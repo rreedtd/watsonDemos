@@ -134,7 +134,7 @@ async function launchBrowser() {
     try {
         const browser = await puppeteer.launch({
             executablePath: '/usr/bin/google-chrome',
-            headless: true,
+            headless: "new",
             defaultViewport: { width, height },
             ignoreHTTPSErrors: true,
             args: [   '--no-sandbox', 
@@ -162,7 +162,7 @@ async function launchHBrowser() {
     try {
         const browser = await puppeteer.launch({
             executablePath: '/usr/bin/google-chrome',
-            headless: true,
+            headless: "new",
             defaultViewport: { width, height },
         ignoreHTTPSErrors: true,
         args: [   myArgs[1],
