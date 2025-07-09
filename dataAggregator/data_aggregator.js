@@ -12,6 +12,8 @@ var browser = null;
 var otp = null;
 var cont = null;
 
+const CURRENT_CRAWL_TIME = new Date().toISOString();
+
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 var crawler = new Crawler(myArgs[0]);
@@ -457,7 +459,8 @@ async function getPandL(url, queueItem) {
                 title: pageTitle,
                 text: out,
                 html: phtml,
-                source_link: url
+                source_link: url,
+                crawl_date: CURRENT_CRAWL_TIME
             };
 
             let ojsH = hashCode(outJSON.text);
