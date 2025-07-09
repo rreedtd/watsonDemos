@@ -6,7 +6,6 @@ var request = require('request');
 const fs = require('fs');
 const fse = require('fs-extra');
 var myArgs = process.argv.slice(2);
-var iterate = 0;
 var uitems = [];
 var outitems = [];
 var browser = null;
@@ -69,7 +68,7 @@ crawler.on("fetchstart", async function(queueItem, responseBuffer, response) {
         cont = this.wait();
         console.log("doing fetch: " + queueItem.url);
         gettingPage = true;
-        await getPandL(queueItem.url).catch((err) => {console.log(err);});
+        await getPandL(queueItem.url, queueItem).catch((err) => {console.log(err);});
         gettingPage = false;
         cont();
         crawler.queue.update(queueItem.id, {
@@ -212,7 +211,7 @@ function getOTP() {
 }
 
 
-async function getPandL(url) {
+async function getPandL(url, queueItem) {
     let links = [];
     try {
         console.log("processing: " + url);
@@ -281,10 +280,12 @@ async function getPandL(url) {
         });
 
         links.forEach(function(item, index) {
-            if(item.includes(myArgs[0]) || item.substring(0,1) == "/")
-                crawler.queueURL(encodeURI(item));
+            if(item.includes(myArgs[0]) || item.substring(0,1) == "/" || item.substring(0,1) == "#")
+                if (crawler.maxDepth > queueItem.depth)
+                    crawler.queueURL(encodeURI(item), queueItem);
         });
-        console.log("added: " + links.length + ", queue length: " + crawler.queue.length + " at " + url);
+        if (crawler.maxDepth > queueItem.depth)
+            console.log("added: " + links.length + ", queue length: " + crawler.queue.length + " at " + url);
 
         await page.evaluate(() => {
             try {
@@ -462,8 +463,8 @@ async function getPandL(url) {
             let ojsH = hashCode(outJSON.text);
             if (!outitems.includes(ojsH) && outJSON.text.length) {
                 outitems.push(ojsH);
-                fse.outputFileSync("/root/da/crawl/" + pname + iterate + ".json", JSON.stringify(outJSON));
-                console.log("wrote " + pname + iterate + ".json");
+                fse.outputFileSync(`/root/da/crawl/${pname}-${queueItem.depth}.json`, JSON.stringify(outJSON));
+                console.log(`wrote ${pname}-${queueItem.depth}.json`);
             } else {
                 if(outJSON.text.length)
                     console.log("Dupe hash, skipping " + pname);
